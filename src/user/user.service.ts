@@ -27,6 +27,7 @@ export class UserService {
         data: {
           email: createUserDTO.email,
           password: hashedPassword,
+          appPassword: createUserDTO.appPassword,
         },
       });
     } catch (error) {
