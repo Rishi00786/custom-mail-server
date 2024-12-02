@@ -16,21 +16,21 @@ export class UserController {
     }
   }
 
-  @Post('login')
-  async login(@Body() loginDTO: { email: string; password: string }) {
-    try {
-      const { email, password } = loginDTO;
-      const isValid = await this.userService.validateUser(email, password);
+  // @Post('login')
+  // async login(@Body() loginDTO: { email: string; password: string }) {
+  //   try {
+  //     const { email, password } = loginDTO;
+  //     const isValid = await this.userService.validateUser(email, password);
 
-      if (!isValid) {
-        return { message: 'Invalid credentials' };
-      }
+  //     if (!isValid) {
+  //       return { message: 'Invalid credentials' };
+  //     }
 
-      return { message: 'Login successful' };
-    } catch (error) {
-      return { message: 'Error validating user', error };
-    }
-  }
+  //     return { message: 'Login successful' };
+  //   } catch (error) {
+  //     return { message: 'Error validating user', error };
+  //   }
+  // }
 
   @Get()
   async findAll() {

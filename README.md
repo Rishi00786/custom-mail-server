@@ -47,6 +47,88 @@
 
 ---
 
+## API Documentation
+
+### 1. **User Signup**
+**Endpoint**: `/user/signup`  
+**Method**: `POST`  
+**Body**:
+```json
+{
+  "email": "user@example.com",
+  "password": "password123",
+  "appPassword": "xxxx xxxx xxxx xxxx"
+}
+```
+
+**Description**: Registers a new user. The `appPassword` is required for 2-step verification enabled accounts. Go to your google account and get it from there.  
+
+---
+
+### 2. **User Login**
+**Endpoint**: `/auth/login`  
+**Method**: `POST`  
+**Body**:
+```json
+{
+  "email": "user@example.com",
+  "password": "password123"
+}
+```
+
+**Response**:
+```json
+{
+  "access_token": "your-access-token"
+}
+```
+
+**Description**: Logs in the user and returns a JWT token. This token must be included in the `Authorization` header for other endpoints.
+
+---
+
+### 3. **Send Mail**
+**Endpoint**: `/mails/send`  
+**Method**: `POST`  
+**Headers**:
+```
+Authorization: Bearer <access_token>
+```
+**Body**:
+```json
+{
+  "to": "recipient@example.com",
+  "subject": "Subject of Email",
+  "body": "Body of Email"
+}
+```
+
+**Description**: Sends an email to the specified recipient.
+
+---
+
+### 4. **Get Inbox**
+**Endpoint**: `/mails/inbox`  
+**Method**: `GET`  
+**Headers**:
+```
+Authorization: Bearer <access_token>
+```
+
+**Description**: Retrieves emails received by the logged-in user.
+
+---
+
+## Features
+
+- User authentication with JWT.
+- Secure handling of email app passwords for 2-step verification.
+- Ability to send emails via an SMTP server.
+- Fetch inbox emails using imap for authenticated users.
+- Emails are transmitted securely using encryption protocols like STARTTLS or SSL/TLS.
+
+---
+
 ## Contributing 🤝
 
 Contributions are welcome! Follow these steps to contribute:
