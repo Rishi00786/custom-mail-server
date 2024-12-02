@@ -5,32 +5,33 @@ import {
   Headers,
   UnauthorizedException,
   Get,
+  UseGuards,
+  Request,
 } from '@nestjs/common';
 import { MailService } from './mails.service';
 import { SendMailDto } from './DTO/send-mail.dto';
+import { AuthGuard } from '../auth/auth.gaurd';
 
 @Controller('mails')
 export class MailController {
   constructor(private readonly mailService: MailService) {}
 
   @Post('send')
+  @UseGuards(AuthGuard)
   async sendMail(
     @Headers('Authorization') authHeader: string,
     @Body() sendMailDto: SendMailDto,
+    @Request() req: any,
   ) {
     if (!authHeader) {
       throw new UnauthorizedException('Authorization token is required');
     }
 
-    const authToken = authHeader.replace('Bearer ', '');
-
     const { to, subject, body } = sendMailDto;
-    const result = await this.mailService.sendEmail(
-      authToken,
-      to,
-      subject,
-      body,
-    );
+
+    const userId = req.user.id;
+
+    const result = await this.mailService.sendEmail(userId, to, subject, body);
 
     return {
       message: 'Email sent successfully',
@@ -39,16 +40,18 @@ export class MailController {
   }
 
   @Get('inbox')
-  async getInbox(@Headers('Authorization') authHeader: string) {
+  @UseGuards(AuthGuard)
+  async getInbox(
+    @Headers('Authorization') authHeader: string,
+    @Request() req: any,
+  ) {
     if (!authHeader) {
       throw new UnauthorizedException('Authorization token is required');
     }
 
-    // Remove 'Bearer ' from the Authorization header
-    const authToken = authHeader.replace('Bearer ', '');
+    const userId = req.user.id;
 
-    // Fetch the emails from the IMAP service
-    const emails = await this.mailService.fetchEmails(authToken);
+    const emails = await this.mailService.fetchEmails(userId);
     return {
       message: 'Emails fetched successfully',
       emails,

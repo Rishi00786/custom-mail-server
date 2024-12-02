@@ -1,40 +1,22 @@
-import { Injectable, UnauthorizedException } from '@nestjs/common';
+import {
+  Injectable,
+  UnauthorizedException,
+  BadRequestException,
+} from '@nestjs/common';
 import { DatabaseService } from 'src/database/database.service';
 import * as nodemailer from 'nodemailer';
-import { JwtService } from '@nestjs/jwt';
 import { User } from '@prisma/client';
-import { simpleParser } from 'mailparser';
 import * as Imap from 'imap';
+import { simpleParser } from 'mailparser';
 
 @Injectable()
 export class MailService {
   private transporter;
 
-  constructor(
-    private databaseService: DatabaseService,
-    private jwtService: JwtService,
-  ) {}
+  constructor(private databaseService: DatabaseService) {}
 
-  async sendEmail(
-    authToken: string,
-    to: string,
-    subject: string,
-    body: string,
-  ) {
+  async sendEmail(userId: string, to: string, subject: string, body: string) {
     try {
-      const decodedToken = this.jwtService.decode(authToken) as {
-        id: string;
-      };
-
-      console.log(decodedToken);
-      const userId = decodedToken?.id;
-
-      if (!userId) {
-        throw new UnauthorizedException(
-          'Invalid or missing authentication token',
-        );
-      }
-
       const user: User = await this.databaseService.user.findUnique({
         where: { id: userId },
       });
@@ -59,27 +41,25 @@ export class MailService {
       };
 
       const info = await this.transporter.sendMail(mailOptions);
-      return info;
+
+      const mail = await this.databaseService.email.create({
+        data: {
+          senderId: userId,
+          senderEmail: user.email,
+          recipientEmail: to,
+          subject: subject,
+          body: body,
+        },
+      });
+
+      return { mail, info };
     } catch (error) {
-      throw new Error(`Failed to send email: ${error.message}`);
+      throw new BadRequestException(`Failed to send email: ${error.message}`);
     }
   }
 
-  async fetchEmails(authToken: string) {
+  async fetchEmails(userId: string) {
     try {
-      // Decode JWT to get userId
-      const decodedToken = this.jwtService.decode(authToken) as {
-        id: string;
-      };
-      const userId = decodedToken?.id;
-
-      if (!userId) {
-        throw new UnauthorizedException(
-          'Invalid or missing authentication token',
-        );
-      }
-
-      // Fetch user data (email and app password) from database
       const user: User = await this.databaseService.user.findUnique({
         where: { id: userId },
       });
@@ -88,39 +68,33 @@ export class MailService {
         throw new UnauthorizedException('User not found');
       }
 
-      // Set up IMAP connection
       const imap = new Imap({
         user: user.email,
         password: user.appPassword,
-        host: 'imap.gmail.com', // Gmail IMAP server
-        port: 993, // Port for secure IMAP
-        tls: true, // Use TLS
+        host: 'imap.gmail.com',
+        port: 993,
+        tls: true,
         tlsOptions: {
-          rejectUnauthorized: false, // Ignore self-signed certificates
+          rejectUnauthorized: false,
         },
       });
 
-      // Open IMAP connection and fetch emails
       const emails = await this.getEmails(imap);
       return emails;
     } catch (error) {
-      throw new Error(`Failed to fetch emails: ${error.message}`);
+      throw new BadRequestException(`Failed to fetch emails: ${error.message}`);
     }
   }
 
   private getEmails(imap: Imap.ImapFlow) {
     return new Promise((resolve, reject) => {
-      // Connect to the IMAP server
       imap.connect();
 
-      // Listen for 'ready' event after connection
       imap.once('ready', () => {
-        // Open the inbox folder
         // eslint-disable-next-line @typescript-eslint/no-unused-vars
         imap.openBox('INBOX', false, (err, box) => {
           if (err) return reject(err);
 
-          // Fetch the most recent 10 emails
           imap.search(['ALL'], (err, results) => {
             if (err) return reject(err);
 
@@ -151,8 +125,8 @@ export class MailService {
             });
 
             fetch.once('end', () => {
-              resolve(emails); // Resolve with the list of emails
-              imap.end(); // Close the IMAP connection
+              resolve(emails);
+              imap.end();
             });
           });
         });
