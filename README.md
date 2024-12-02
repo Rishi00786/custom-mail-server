@@ -8,6 +8,45 @@
 - npm (Node Package Manager)
 - A MySQL database (cloud service recommended)
 
+# API Deployment
+
+The API is live and ready for testing!
+
+## Base URL
+```
+https://custom-mail-server.onrender.com/
+```
+
+## Testing the API
+
+You can use tools like [Postman](https://www.postman.com/) or [cURL](https://curl.se/) to interact with the deployed API.
+
+### Available Endpoints
+
+1. **User Signup**
+   - **Endpoint**: `/user/signup`
+   - **Method**: `POST`
+
+2. **User Login**
+   - **Endpoint**: `/auth/login`
+   - **Method**: `POST`
+
+3. **Send Mail**
+   - **Endpoint**: `/mails/send`
+   - **Method**: `POST`
+
+4. **Inbox**
+   - **Endpoint**: `/mails/inbox`
+   - **Method**: `GET`
+
+**Note**: Ensure you include the JWT token in the `Authorization` header for protected endpoints like sending emails or fetching inbox data.
+
+### Example Header
+```http
+Authorization: Bearer <your-access-token>
+```
+
+
 ### Installation Steps
 
 1. **Clone the Repository**
