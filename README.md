@@ -129,6 +129,42 @@ Authorization: Bearer <access_token>
 
 ---
 
+# Security Features
+
+This custom mail server prioritizes security at every stage of its functionality. Below is a summary of the key security features implemented:
+
+## 1. JWT Authentication
+- Uses JSON Web Tokens (JWT) for secure user authentication.
+- Tokens are signed and validated to ensure that only authorized users can access protected routes.
+
+## 2. Password Hashing
+- User passwords are hashed using bcrypt before storage, ensuring that sensitive data is never stored in plain text.
+
+## 3. Secure Email Transmission
+- Email sending is secured using SSL/TLS encryption via nodemailer to prevent unencrypted email transmission.
+
+## 4. Role-based Authorization
+- AuthGuard ensures that only users with a valid JWT token can access specific routes like sending emails or fetching inbox data.
+
+## 5. Email Credentials Security
+- Email services use app-specific passwords (e.g., for Gmail) rather than user account passwords to improve security.
+
+## 6. Secure IMAP Email Fetching
+- IMAP email fetching uses TLS encryption to securely connect to email servers.
+
+## 7. Custom Error Handling
+- The application uses structured error handling (e.g., UnauthorizedException, BadRequestException) to prevent exposing sensitive stack traces.
+
+## 8. Sensitive Data Protection
+- All sensitive user information (such as passwords and email credentials) is securely handled and not exposed in logs or error messages.
+
+## 9. Unique User Registration
+- During user registration, the application checks for unique emails to prevent duplicate accounts.
+
+## 10. Data Integrity
+- Input validation is used to ensure the integrity of user data, particularly in email-related fields (to, subject, body).
+
+
 ## Contributing 🤝
 
 Contributions are welcome! Follow these steps to contribute:
